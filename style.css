@@ -1,0 +1,92 @@
+/* 全局样式和字体设置 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* 主内容容器 */
+.container {
+    width: 100%;
+    max-width: 600px; /* 在大屏幕上限制最大宽度 */
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 顶部标题 */
+header h2 {
+    text-align: center;
+    color: #2c3e50;
+}
+header p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* 电路图样式 */
+.circuit-diagram {
+    text-align: center;
+    margin: 20px 0;
+}
+.circuit-diagram img {
+    max-width: 80%;
+    height: auto;
+}
+
+/* 滑动条控制区域 */
+.controls {
+    margin-top: 20px;
+}
+.slider-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.slider-group label {
+    width: 60px; /* 固定标签宽度，让它们对齐 */
+    font-weight: bold;
+}
+.slider-group input[type="range"] {
+    flex-grow: 1; /* 让滑动条占据剩余空间 */
+    margin: 0 15px;
+}
+.slider-group span {
+    font-weight: bold;
+    color: #3498db;
+    min-width: 40px; /* 给数值留出足够空间 */
+    text-align: right;
+}
+
+/* 图表标题和状态 */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+.chart-header h3 {
+    margin: 0;
+}
+#status-display {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #eaf2f8;
+    color: #2e86c1;
+}
+
+/* 图表容器，给它一个固定的高度 */
+#chart-container {
+    width: 100%;
+    height: 400px; /* 必须指定高度，否则图表显示不出来 */
+    margin-top: 10px;
+}
