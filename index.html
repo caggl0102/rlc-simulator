@@ -1,79 +1,81 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RLC 电路模拟</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RLC 电路模拟</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
-<!-- 放在 </body> 前 -->
-<script defer src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-<script>
-  // 如果 CDN 没加载到（echarts 还是 undefined），就用本地文件兜底
-  if (typeof window.echarts === 'undefined') {
-    document.write('<script defer src="libs/echarts.min.js"><\/script>');
-  }
-</script>
-<script defer src="script.js"></script>
-
-
 <body>
+  <div class="container">
+    <!-- 顶部标题 -->
+    <header>
+      <h2>二阶电路的4种工作状态</h2>
+      <p>
+        图示电路为零输入 RLC 串联二阶电路，已知电容初始电压
+        u<sub>C</sub>(0)=10V，电感初始电流为 0A。
+      </p>
+    </header>
 
-    <div class="container">
-        <!-- 顶部标题 -->
-        <header>
-            <h2>二阶电路的4种工作状态</h2>
-            <p>
-                图示电路为零输入 RLC串联二阶电路, 已知电容初始电压 u<sub>C</sub>(0_)=10V, 电感初始电流为0A。
-            </p>
-        </header>
-
-        <!-- 电路图 -->
-        <div class="circuit-diagram">
-            <!-- 提示：你需要一张电路图图片，我们暂时用文字占位 -->
-            <!-- 稍后我们会把图片放进来 -->
-            <img src="circuit.png" alt="RLC串联电路图">
-        </div>
-
-        <!-- 参数控制区域 -->
-        <div class="controls">
-            <!-- 电阻 R 的滑动条 -->
-            <div class="slider-group">
-                <label for="r-slider">R (Ω)</label>
-                <input type="range" id="r-slider" min="0" max="4" value="3.2" step="0.1">
-                <span id="r-value">3.2</span>
-            </div>
-            <!-- 电感 L 的滑动条 -->
-            <div class="slider-group">
-                <label for="l-slider">L (H)</label>
-                <input type="range" id="l-slider" min="0.1" max="4" value="2" step="0.1">
-                <span id="l-value">2</span>
-            </div>
-            <!-- 电容 C 的滑动条 -->
-            <div class="slider-group">
-                <label for="c-slider">C (F)</label>
-                <input type="range" id="c-slider" min="0.1" max="4" value="1.9" step="0.1">
-                <span id="c-value">1.9</span>
-            </div>
-        </div>
-
-        <!-- 图表标题和状态显示 -->
-        <div class="chart-header">
-            <h3>电容电压波形</h3>
-            <div id="status-display">状态: 过阻尼</div>
-        </div>
-
-        <!-- ECharts 图表容器 -->
-        <div id="chart-container"></div>
-
+    <!-- 电路图 -->
+    <div class="circuit-diagram">
+      <img src="circuit.png" alt="RLC 串联电路图">
     </div>
 
-    <!-- 引入 ECharts 和我们自己的脚本 -->
-    <!-- 注意：这些 script 标签要放在 </body> 之前 -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-    <script src="script.js"></script>
+    <!-- 参数控制区域 -->
+    <div class="controls">
+      <!-- R -->
+      <div class="slider-group">
+        <label for="r-slider">R (Ω)</label>
+        <input type="range" id="r-slider" min="0" max="4" value="3.2" step="0.1">
+        <span id="r-value">3.2</span>
+      </div>
+      <!-- L -->
+      <div class="slider-group">
+        <label for="l-slider">L (H)</label>
+        <input type="range" id="l-slider" min="0.1" max="4" value="2.0" step="0.1">
+        <span id="l-value">2.0</span>
+      </div>
+      <!-- C -->
+      <div class="slider-group">
+        <label for="c-slider">C (F)</label>
+        <input type="range" id="c-slider" min="0.1" max="4" value="1.9" step="0.1">
+        <span id="c-value">1.9</span>
+      </div>
+      <!-- E：新增直流电压源 -->
+      <div class="slider-group">
+        <label for="e-slider">E (V)</label>
+        <input type="range" id="e-slider" min="0" max="10" value="0" step="0.2">
+        <span id="e-value">10.0</span>
+      </div>
+    </div>
 
+    <!-- 图表标题和状态显示 -->
+    <div class="chart-header">
+      <h3>电容电压波形</h3>
+      <div id="status-display">状态: 过阻尼</div>
+    </div>
+
+    <!-- 自定义图例（真下标） -->
+    <div class="custom-legend">
+      <span class="legend-dot"></span>
+      <span class="legend-text">u<sub>C</sub>(t)</span>
+    </div>
+
+    <!-- 外层包裹，用于左侧放“自定义纵轴标题（真下标）” -->
+    <div id="chart-wrap">
+      <div class="y-axis-label">u<sub>C</sub>/V</div>
+      <div id="chart-container"></div>
+    </div>
+  </div>
+
+  <!-- ECharts：CDN + 本地兜底 + defer -->
+  <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script>
+    if (typeof window.echarts === 'undefined') {
+      document.write('<script defer src="libs/echarts.min.js"><\/script>');
+    }
+  </script>
+  <script defer src="script.js"></script>
 </body>
-
 </html>
