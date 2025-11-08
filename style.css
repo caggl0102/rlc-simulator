@@ -121,10 +121,11 @@ header p {
 
 .y-axis-label {
   position: absolute;
-  top: 50%;
-  left: -28px;
-  transform: translate(-100%, -50%) rotate(-90deg);
+  top: 6px;            /* 离上边稍微留点空隙 */
+  left: 8px;           /* 图内部左边一点 */
+  transform: none;     /* 不旋转 */
   color: #666;
   font-size: 12px;
   pointer-events: none;
 }
+

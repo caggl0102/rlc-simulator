@@ -70,18 +70,18 @@ window.addEventListener('load', function () {
 
   function updateCharts() {
     const R = parseFloat(rSlider.value);           // Ω
-    const L_uH = parseFloat(lSlider.value);        // µH（界面单位）
+    const L_mH = parseFloat(lSlider.value);        // µH（界面单位）
     const C_uF = parseFloat(cSlider.value);        // µF（界面单位）
     const E = parseFloat(eSlider.value);           // V
 
     // 显示数值（与界面单位一致）
     rValueSpan.textContent = R.toFixed(0);
-    lValueSpan.textContent = L_uH.toFixed(0);
+    lValueSpan.textContent = L_mH.toFixed(0);
     cValueSpan.textContent = C_uF.toFixed(1);
     eValueSpan.textContent = E.toFixed(1);
 
     // 换算为 SI 单位
-    const L = L_uH * 1e-6; // H
+    const L = L_mH * 1e-3; // H
     const C = C_uF * 1e-6; // F
 
     // 系统参数
@@ -173,7 +173,7 @@ window.addEventListener('load', function () {
     }
 
     // 状态条
-    statusDisplay.textContent = `状态: ${circuitStatus} (R=${R}Ω, L=${lSlider.value}µH, C=${cSlider.value}µF, E=${E.toFixed(1)}V)`;
+    statusDisplay.textContent = `状态: ${circuitStatus} (R=${R}Ω, L=${lSlider.value}mH, C=${cSlider.value}µF, E=${E.toFixed(1)}V)`;
 
     // 三张图各自的坐标轴范围
     // y 轴根据数据自动估算一个对称范围
