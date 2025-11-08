@@ -8,10 +8,11 @@ body {
   display: flex;
   justify-content: center;
 }
+
 .container {
   width: 100%;
-  max-width: 680px;
-  background-color: #fff;
+  max-width: 780px;
+  background: #fff;
   padding: 24px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,.08);
@@ -31,8 +32,14 @@ header p {
 }
 
 /* 电路图 */
-.circuit-diagram { text-align: center; margin: 16px 0 8px; }
-.circuit-diagram img { max-width: 90%; height: auto; }
+.circuit-diagram {
+  text-align: center;
+  margin: 16px 0 8px;
+}
+.circuit-diagram img {
+  max-width: 90%;
+  height: auto;
+}
 
 /* 控件区 */
 .controls { margin-top: 12px; }
@@ -43,17 +50,24 @@ header p {
   margin: 12px 0;
 }
 .slider-group label {
-  width: 70px;
+  width: 86px;
   font-weight: 600;
 }
 .slider-group input[type="range"] {
   flex: 1;
 }
 .slider-group span {
-  width: 60px;
+  width: 70px;
   text-align: right;
   color: #2e86c1;
   font-weight: 600;
+}
+
+/* 图表模块 */
+.chart-block {
+  margin-top: 18px;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
 }
 
 /* 图表标题与状态 */
@@ -61,11 +75,11 @@ header p {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 18px;
-  border-top: 1px solid #eee;
-  padding-top: 12px;
+  margin-bottom: 6px;
 }
-.chart-header h3 { margin: 0; }
+.chart-header h3 {
+  margin: 0;
+}
 #status-display {
   font-weight: 600;
   padding: 4px 10px;
@@ -79,36 +93,38 @@ header p {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 8px 0 2px;
+  margin: 6px 0 2px;
 }
 .custom-legend .legend-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #3498db; /* 与折线颜色一致 */
 }
 .custom-legend .legend-text {
   font-size: 12px;
   color: #333;
 }
 
-/* 图表容器 & 自定义纵轴标题（真下标） */
-#chart-wrap {
+/* 每张图表的容器 & 左侧真下标 */
+.chart-wrap {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 360px;
   margin-top: 6px;
 }
-#chart-container {
+#chart-uc,
+#chart-ur,
+#chart-ul {
   width: 100%;
   height: 100%;
 }
+
 .y-axis-label {
   position: absolute;
   top: 50%;
-  left: -28px;                 /* 可微调 -24~-36 */
+  left: -28px;
   transform: translate(-100%, -50%) rotate(-90deg);
   color: #666;
   font-size: 12px;
-  pointer-events: none;        /* 不拦截鼠标 */
+  pointer-events: none;
 }

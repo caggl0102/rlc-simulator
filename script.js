@@ -4,154 +4,222 @@ window.addEventListener('load', function () {
   const lSlider = document.getElementById('l-slider');
   const cSlider = document.getElementById('c-slider');
   const eSlider = document.getElementById('e-slider');
-
   const rValueSpan = document.getElementById('r-value');
   const lValueSpan = document.getElementById('l-value');
   const cValueSpan = document.getElementById('c-value');
   const eValueSpan = document.getElementById('e-value');
-
   const statusDisplay = document.getElementById('status-display');
-  const chartContainer = document.getElementById('chart-container');
+
+  const ucDom = document.getElementById('chart-uc');
+  const urDom = document.getElementById('chart-ur');
+  const ulDom = document.getElementById('chart-ul');
 
   if (typeof window.echarts === 'undefined') {
-    chartContainer.innerHTML =
-      '<div style="padding:12px;color:#c00;">ECharts 未加载成功，请检查网络或使用本地兜底 libs/echarts.min.js。</div>';
+    [ucDom, urDom, ulDom].forEach(dom => dom.innerHTML =
+      '<div style="padding:12px;color:#c00;">ECharts 未加载成功，请检查网络或使用本地兜底 libs/echarts.min.js。</div>'
+    );
     return;
   }
 
-  const myChart = echarts.init(chartContainer);
+  const chartUC = echarts.init(ucDom);
+  const chartUR = echarts.init(urDom);
+  const chartUL = echarts.init(ulDom);
 
-  const option = {
-    tooltip: {
-      trigger: 'axis',
-      // tooltip 支持 HTML，因此也用真下标
-      formatter: (params) => {
-        const p = params[0];
-        const t = p.value[0].toFixed(2);
-        const u = p.value[1].toFixed(3);
-        return `u<sub>C</sub>(t) = ${u} V<br/>t = ${t} s`;
-      }
-    },
-    // 关闭原生图例（我们用自定义 HTML 图例）
-    legend: { show: false },
-    grid: { left: '10%', right: '6%', bottom: '10%', top: '12%', containLabel: true },
-    xAxis: {
-      type: 'value',
-      name: 't/s',
-      min: 0,
-      max: 30
-    },
-    yAxis: {
-      type: 'value',
-      name: '',       // 轴标题我们用外部 HTML 放真下标
-      min: -15,
-      max: 15
-    },
-    series: [{
-      name: 'uC(t)',  // 名称不再显示给用户，仅供内部识别
-      type: 'line',
-      smooth: true,
-      symbol: 'none',
-      lineStyle: { width: 2, color: '#3498db' },
-      data: []
-    }]
-  };
+  // 共用的 option 生成器（按需设置轴单位）
+  function makeOption(titleUnit) {
+    return {
+      tooltip: {
+        trigger: 'axis',
+        formatter: (params) => {
+          const p = params[0];
+          const t = p.value[0];
+          const u = p.value[1];
+          return `t = ${t.toFixed(2)} ${titleUnit.tUnit}<br/>${p.seriesName} = ${u.toFixed(3)} V`;
+        }
+      },
+      legend: { show: false },
+      grid: { left: '10%', right: '6%', bottom: '10%', top: '12%', containLabel: true },
+      xAxis: { type: 'value', name: `t/${titleUnit.axis}`, min: 0, max: titleUnit.xMax },
+      yAxis: { type: 'value', min: titleUnit.yMin, max: titleUnit.yMax },
+      series: [{ type: 'line', smooth: true, symbol: 'none', lineStyle: { width: 2 }, data: [] }]
+    };
+  }
 
-  myChart.setOption(option);
+  // 初始条件
+  const uC0 = 10; // uC(0) = 10 V（保持不变）
+  const i0  = 0;  // i(0) = 0 A（保持不变）
 
-  // 常量：初始条件
-  const uC0 = 10;      // uC(0) = 10 V
-  const i0  = 0;       // i(0) = 0 A
-  const duC0 = i0;     // 因为 i = C * duC/dt，这里先放占位，下面会除以 C
+  // 根据当前参数，确定合适的显示时长和单位
+  function decideTimeBase(alpha, omega0, isUnderdamped, omega_d) {
+    let tEnd = 0.02; // 兜底：20 ms
+    if (alpha > 0) tEnd = Math.max(tEnd, 5 / alpha); // 衰减到 ~e^-5
+    if (isUnderdamped && omega_d > 0) {
+      const T = 2 * Math.PI / omega_d; // 自然振荡周期
+      tEnd = Math.max(tEnd, 8 * T);    // 展示 ~8 个周期
+    }
+    // 限幅，避免过长或过短
+    tEnd = Math.min(Math.max(tEnd, 50e-6), 5); // [50 µs, 5 s]
 
-  function updateChart() {
-    const R = parseFloat(rSlider.value);
-    const L = parseFloat(lSlider.value);
-    const C = parseFloat(cSlider.value);
-    const E = parseFloat(eSlider.value);
+    // 单位与缩放
+    let scale = 1; let axis = 's'; let tUnit = 's'; let xMax;
+    if (tEnd < 2e-3) { scale = 1e6; axis = 'µs'; tUnit = 'µs'; xMax = tEnd * scale; }
+    else if (tEnd < 2) { scale = 1e3; axis = 'ms'; tUnit = 'ms'; xMax = tEnd * scale; }
+    else { scale = 1; axis = 's'; tUnit = 's'; xMax = tEnd; }
+    return { tEnd, scale, axis, tUnit, xMax };
+  }
 
-    rValueSpan.textContent = R.toFixed(1);
-    lValueSpan.textContent = L.toFixed(1);
-    cValueSpan.textContent = C.toFixed(1);
+  function updateCharts() {
+    const R = parseFloat(rSlider.value);           // Ω
+    const L_uH = parseFloat(lSlider.value);        // µH（界面单位）
+    const C_uF = parseFloat(cSlider.value);        // µF（界面单位）
+    const E = parseFloat(eSlider.value);           // V
+
+    // 显示数值（与界面单位一致）
+    rValueSpan.textContent = R.toFixed(0);
+    lValueSpan.textContent = L_uH.toFixed(0);
+    cValueSpan.textContent = C_uF.toFixed(1);
     eValueSpan.textContent = E.toFixed(1);
 
-    // 参数
+    // 换算为 SI 单位
+    const L = L_uH * 1e-6; // H
+    const C = C_uF * 1e-6; // F
+
+    // 系统参数
     const alpha  = R / (2 * L);
     const omega0 = 1 / Math.sqrt(L * C);
 
-    // 初始导数 duC/dt = i(0)/C = 0（因为 i0 = 0）
-    const du0 = duC0 / C; // 这里就是 0，但写出来更清晰
+    // 初始导数 duC/dt = i(0)/C = 0
+    const du0 = 0;
 
-    // 把含源的问题化为：uC(t) = E + v(t)，v(t) 解齐次方程
-    // v(0) = uC0 - E,  v'(0) = du0
-    const v0  = uC0 - E;
-    const eps = 1e-6;
+    // 化为 uC(t) = E + v(t)，其中 v(t) 解齐次方程
+    const v0 = uC0 - E;
+
+    const eps = 1e-9;
     let circuitStatus = '';
-    const points = [];
+    let ptsUC = [];
+    let ptsUR = [];
+    let ptsUL = [];
 
-    if (Math.abs(alpha - omega0) < 1e-3) {
-      // 临界阻尼：v(t) = (A1 + A2 t) e^{-alpha t}
+    const isCritical = Math.abs(alpha - omega0) < 1e-3 * omega0; // 相对判断更稳健
+    const isOver     = alpha > omega0 && !isCritical;
+    const isUnder    = alpha < omega0 && !isCritical;
+
+    // 决定时间窗口与单位
+    const { tEnd, scale, axis, tUnit, xMax } = decideTimeBase(alpha, omega0, isUnder, Math.sqrt(Math.max(omega0*omega0 - alpha*alpha, 0)));
+
+    // 采样步长：固定为 800 个点以内
+    const N = 800;
+    const dt = tEnd / N;
+
+    // 三种情况分别推导 uC 和 duC/dt（解析表达，避免数值微分噪声）
+    if (isCritical) {
       circuitStatus = '临界阻尼';
       const A1 = v0;
-      // 由 v'(0) = -alpha*A1 + A2 = du0  =>  A2 = du0 + alpha*A1
-      const A2 = du0 + alpha * A1;
-
-      for (let t = 0; t <= 30 + eps; t += 0.1) {
-        const v = (A1 + A2 * t) * Math.exp(-alpha * t);
-        const u = E + v;
-        points.push([+t.toFixed(2), u]);
+      const A2 = du0 + alpha * A1; // 由 v'(0) = -alpha*A1 + A2 = du0
+      for (let k = 0; k <= N; k++) {
+        const t = k * dt;
+        const e = Math.exp(-alpha * t);
+        const v = (A1 + A2 * t) * e;
+        const dudt = (A2 - alpha*A1 - alpha*A2*t) * e; // v'(t)
+        const uC = E + v;
+        const i = C * dudt;
+        const uR = R * i;
+        const uL = E - uR - uC; // KVL
+        const x = t * scale;
+        ptsUC.push([x, uC]);
+        ptsUR.push([x, uR]);
+        ptsUL.push([x, uL]);
       }
-    } else if (alpha > omega0) {
-      // 过阻尼：v(t) = A1 e^{s1 t} + A2 e^{s2 t}, s1 > s2 （都为负）
+    } else if (isOver) {
       circuitStatus = '过阻尼';
-      const s1 = -alpha + Math.sqrt(alpha * alpha - omega0 * omega0);
-      const s2 = -alpha - Math.sqrt(alpha * alpha - omega0 * omega0);
-      // 条件：v(0)=A1+A2=v0，v'(0)=A1 s1 + A2 s2 = du0
-      // 解得：
-      // A1 = (du0 - v0 s2) / (s1 - s2)
-      // A2 = v0 - A1
+      const s1 = -alpha + Math.sqrt(alpha*alpha - omega0*omega0);
+      const s2 = -alpha - Math.sqrt(alpha*alpha - omega0*omega0);
       const A1 = (du0 - v0 * s2) / (s1 - s2);
       const A2 = v0 - A1;
-
-      for (let t = 0; t <= 30 + eps; t += 0.1) {
+      for (let k = 0; k <= N; k++) {
+        const t = k * dt;
         const v = A1 * Math.exp(s1 * t) + A2 * Math.exp(s2 * t);
-        const u = E + v;
-        points.push([+t.toFixed(2), u]);
+        const dudt = A1*s1 * Math.exp(s1 * t) + A2*s2 * Math.exp(s2 * t);
+        const uC = E + v;
+        const i = C * dudt;
+        const uR = R * i;
+        const uL = E - uR - uC;
+        const x = t * scale;
+        ptsUC.push([x, uC]);
+        ptsUR.push([x, uR]);
+        ptsUL.push([x, uL]);
       }
     } else {
-      // 欠阻尼：v(t) = e^{-alpha t} (A1 cos ωd t + A2 sin ωd t)
       circuitStatus = '欠阻尼';
-      const omega_d = Math.sqrt(omega0 * omega0 - alpha * alpha);
+      const omega_d = Math.sqrt(omega0*omega0 - alpha*alpha);
       const A1 = v0;
-      // v'(0) = -alpha*A1 + A2*omega_d = du0  =>  A2 = (du0 + alpha*A1)/omega_d
-      const A2 = (du0 + alpha * A1) / omega_d;
-
-      for (let t = 0; t <= 30 + eps; t += 0.1) {
-        const v = Math.exp(-alpha * t) * (A1 * Math.cos(omega_d * t) + A2 * Math.sin(omega_d * t));
-        const u = E + v;
-        points.push([+t.toFixed(2), u]);
+      const A2 = (du0 + alpha * A1) / omega_d; // 由 v'(0) = -alpha*A1 + A2*omega_d = du0
+      for (let k = 0; k <= N; k++) {
+        const t = k * dt;
+        const e = Math.exp(-alpha * t);
+        const cos = Math.cos(omega_d * t);
+        const sin = Math.sin(omega_d * t);
+        const v = e * (A1 * cos + A2 * sin);
+        const dudt = e * ( -alpha*(A1*cos + A2*sin) + (-A1*omega_d*sin + A2*omega_d*cos) );
+        const uC = E + v;
+        const i = C * dudt;
+        const uR = R * i;
+        const uL = E - uR - uC;
+        const x = t * scale;
+        ptsUC.push([x, uC]);
+        ptsUR.push([x, uR]);
+        ptsUL.push([x, uL]);
       }
     }
 
     // 状态条
-    statusDisplay.textContent =
-      `状态: ${circuitStatus} (R=${R.toFixed(1)}Ω, L=${L.toFixed(1)}H, C=${C.toFixed(1)}F, E=${E.toFixed(1)}V)`;
+    statusDisplay.textContent = `状态: ${circuitStatus} (R=${R}Ω, L=${lSlider.value}µH, C=${cSlider.value}µF, E=${E.toFixed(1)}V)`;
 
-    // 刷新数据
-    myChart.setOption({
-      series: [{ data: points }]
-    });
+    // 三张图各自的坐标轴范围
+    // y 轴根据数据自动估算一个对称范围
+    function yRange(points) {
+      let min = Infinity, max = -Infinity;
+      points.forEach(p => { min = Math.min(min, p[1]); max = Math.max(max, p[1]); });
+      const pad = 0.1 * Math.max(1, Math.max(Math.abs(min), Math.abs(max)));
+      min = Math.floor((min - pad) * 10) / 10;
+      max = Math.ceil((max + pad) * 10) / 10;
+      if (min === max) { min -= 1; max += 1; }
+      return { yMin: min, yMax: max };
+    }
+
+    const yrUC = yRange(ptsUC);
+    const yrUR = yRange(ptsUR);
+    const yrUL = yRange(ptsUL);
+
+    const unitPack = { axis, tUnit, xMax, yMin: 0, yMax: 0 };
+
+    const optUC = makeOption({ axis, tUnit, xMax, yMin: yrUC.yMin, yMax: yrUC.yMax });
+    optUC.series[0].name = 'uC(t)';
+    optUC.series[0].lineStyle = { width: 2, color: '#3498db' };
+    optUC.series[0].data = ptsUC;
+
+    const optUR = makeOption({ axis, tUnit, xMax, yMin: yrUR.yMin, yMax: yrUR.yMax });
+    optUR.series[0].name = 'uR(t)';
+    optUR.series[0].lineStyle = { width: 2, color: '#e67e22' };
+    optUR.series[0].data = ptsUR;
+
+    const optUL = makeOption({ axis, tUnit, xMax, yMin: yrUL.yMin, yMax: yrUL.yMax });
+    optUL.series[0].name = 'uL(t)';
+    optUL.series[0].lineStyle = { width: 2, color: '#8e44ad' };
+    optUL.series[0].data = ptsUL;
+
+    chartUC.setOption(optUC, true);
+    chartUR.setOption(optUR, true);
+    chartUL.setOption(optUL, true);
   }
 
   // 事件绑定
-  rSlider.addEventListener('input', updateChart);
-  lSlider.addEventListener('input', updateChart);
-  cSlider.addEventListener('input', updateChart);
-  eSlider.addEventListener('input', updateChart);
+  rSlider.addEventListener('input', updateCharts);
+  lSlider.addEventListener('input', updateCharts);
+  cSlider.addEventListener('input', updateCharts);
+  eSlider.addEventListener('input', updateCharts);
 
-  // 初次渲染
-  updateChart();
-
-  // 自适应
-  window.addEventListener('resize', () => myChart.resize());
+  // 初次渲染 & 自适应
+  updateCharts();
+  window.addEventListener('resize', () => { chartUC.resize(); chartUR.resize(); chartUL.resize(); });
 });

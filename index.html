@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>RLC 电路模拟</title>
+  <title>RLC 电路模拟（µH / µF & 三个波形）</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,7 +12,7 @@
     <header>
       <h2>二阶电路的4种工作状态</h2>
       <p>
-        图示电路为零输入 RLC 串联二阶电路，已知电容初始电压
+        图示电路为 RLC 串联二阶电路，已知电容初始电压
         u<sub>C</sub>(0)=10V，电感初始电流为 0A。
       </p>
     </header>
@@ -27,45 +27,76 @@
       <!-- R -->
       <div class="slider-group">
         <label for="r-slider">R (Ω)</label>
-        <input type="range" id="r-slider" min="0" max="4" value="3.2" step="0.1">
-        <span id="r-value">3.2</span>
+        <input type="range" id="r-slider" min="0" max="200" value="10" step="1">
+        <span id="r-value">10</span>
       </div>
-      <!-- L -->
+
+      <!-- L（µH） -->
       <div class="slider-group">
-        <label for="l-slider">L (H)</label>
-        <input type="range" id="l-slider" min="0.1" max="4" value="2.0" step="0.1">
-        <span id="l-value">2.0</span>
+        <label for="l-slider">L (µH)</label>
+        <input type="range" id="l-slider" min="10" max="5000" value="1000" step="10">
+        <span id="l-value">1000</span>
       </div>
-      <!-- C -->
+
+      <!-- C（µF） -->
       <div class="slider-group">
-        <label for="c-slider">C (F)</label>
-        <input type="range" id="c-slider" min="0.1" max="4" value="1.9" step="0.1">
-        <span id="c-value">1.9</span>
+        <label for="c-slider">C (µF)</label>
+        <input type="range" id="c-slider" min="0.1" max="100" value="10" step="0.1">
+        <span id="c-value">10.0</span>
       </div>
-      <!-- E：新增直流电压源 -->
+
+      <!-- E：直流电压源 -->
       <div class="slider-group">
         <label for="e-slider">E (V)</label>
-        <input type="range" id="e-slider" min="0" max="10" value="0" step="0.2">
+        <input type="range" id="e-slider" min="0" max="20" value="10" step="0.5">
         <span id="e-value">10.0</span>
       </div>
     </div>
 
-    <!-- 图表标题和状态显示 -->
-    <div class="chart-header">
-      <h3>电容电压波形</h3>
-      <div id="status-display">状态: 过阻尼</div>
+    <!-- 图表：电容电压 -->
+    <div class="chart-block">
+      <div class="chart-header">
+        <h3>电容电压波形</h3>
+        <div id="status-display">状态: ——</div>
+      </div>
+      <div class="custom-legend">
+        <span class="legend-dot" style="background:#3498db"></span>
+        <span class="legend-text">u<sub>C</sub>(t)</span>
+      </div>
+      <div class="chart-wrap">
+        <div class="y-axis-label">u<sub>C</sub>/V</div>
+        <div id="chart-uc"></div>
+      </div>
     </div>
 
-    <!-- 自定义图例（真下标） -->
-    <div class="custom-legend">
-      <span class="legend-dot"></span>
-      <span class="legend-text">u<sub>C</sub>(t)</span>
+    <!-- 图表：电阻电压 -->
+    <div class="chart-block">
+      <div class="chart-header">
+        <h3>电阻电压波形</h3>
+      </div>
+      <div class="custom-legend">
+        <span class="legend-dot" style="background:#e67e22"></span>
+        <span class="legend-text">u<sub>R</sub>(t)</span>
+      </div>
+      <div class="chart-wrap">
+        <div class="y-axis-label">u<sub>R</sub>/V</div>
+        <div id="chart-ur"></div>
+      </div>
     </div>
 
-    <!-- 外层包裹，用于左侧放“自定义纵轴标题（真下标）” -->
-    <div id="chart-wrap">
-      <div class="y-axis-label">u<sub>C</sub>/V</div>
-      <div id="chart-container"></div>
+    <!-- 图表：电感电压 -->
+    <div class="chart-block">
+      <div class="chart-header">
+        <h3>电感电压波形</h3>
+      </div>
+      <div class="custom-legend">
+        <span class="legend-dot" style="background:#8e44ad"></span>
+        <span class="legend-text">u<sub>L</sub>(t)</span>
+      </div>
+      <div class="chart-wrap">
+        <div class="y-axis-label">u<sub>L</sub>/V</div>
+        <div id="chart-ul"></div>
+      </div>
     </div>
   </div>
 
