@@ -4,7 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>RLC 电路模拟（µH / µF & 三个波形）</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=2025-11-12-a" />
+  <!-- 强制刷新：版本跳转（放在最前面） -->
+  <script>
+    // 每次发布只改这里：版本号
+    const BUILD_VERSION = "2025-11-12-a";
+
+    (function forceFresh() {
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("v") !== BUILD_VERSION) {
+          url.searchParams.set("v", BUILD_VERSION);
+          window.location.replace(url.toString());
+        }
+      } catch (e) {
+        var sep = window.location.search ? "&" : "?";
+        window.location.replace(window.location.href + sep + "v=" + BUILD_VERSION);
+      }
+    })();
+  </script>
+
+  <!-- 适配部分内置 WebView 的兼容禁缓存（可选但推荐） -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
 </head>
 <body>
   <div class="container">
@@ -101,12 +125,12 @@
   </div>
 
   <!-- ECharts：CDN + 本地兜底 + defer -->
-  <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js?v=2025-11-12-a"></script>
   <script>
     if (typeof window.echarts === 'undefined') {
-      document.write('<script defer src="libs/echarts.min.js"><\/script>');
+      document.write('<script defer src="libs/echarts.min.js?v=2025-11-12-a"><\/script>');
     }
   </script>
-  <script defer src="script.js"></script>
+  <script defer src="script.js?v=2025-11-12-a"></script>
 </body>
 </html>
