@@ -38,8 +38,16 @@ window.addEventListener('load', function () {
         }
       },
       legend: { show: false },
-      grid: { left: '10%', right: '6%', bottom: '10%', top: '12%', containLabel: true },
-      xAxis: { type: 'value', name: `t/${titleUnit.axis}`, min: 0, max: titleUnit.xMax },
+      grid: { left: 48, right: 24, bottom: 40, top: 24, containLabel: true },
+      xAxis: {
+        type: 'value',
+        name: `t/${titleUnit.axis}`,   // 例如 t/ms
+        nameLocation: 'middle',        // 关键：把“t/ms”放到中间，不会被右侧裁掉
+        nameGap: 28,                   // 名称与轴线的间距
+        axisLabel: { margin: 8 },      // 刻度与轴线的间距（给底部留点呼吸）
+        min: 0,
+        max: titleUnit.xMax
+      },
       yAxis: { type: 'value', min: titleUnit.yMin, max: titleUnit.yMax },
       series: [{ type: 'line', smooth: true, symbol: 'none', lineStyle: { width: 2 }, data: [] }]
     };

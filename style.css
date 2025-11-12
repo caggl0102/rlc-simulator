@@ -146,8 +146,8 @@ header p {
 
   /* 把图表略微左移，并加宽一点 */
   .chart-wrap {
-    margin-left: -12px;                /* 左移一点点 */
-    width: calc(100% + 24px);          /* 同时加宽，避免右边被裁掉 */
+    margin-left: -16px;                /* 左移一点点 */
+    width: calc(100% + 32px);          /* 同时加宽，避免右边被裁掉 */
   }
 }
 
