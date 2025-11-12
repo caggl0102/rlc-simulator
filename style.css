@@ -73,14 +73,18 @@ header p {
 /* 图表标题与状态 */
 .chart-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;     /* 垂直排布：一行一行 */
+  align-items: flex-start;    /* 靠左对齐 */
   margin-bottom: 6px;
+  gap: 4px;                   /* 每行之间留一点空隙 */
 }
+
 .chart-header h3 {
   margin: 0;
 }
+
 #status-display {
+  order: -1;                  /* 在 flex 里把它排到最前面 → 显示在最上面 */
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 6px;
@@ -127,5 +131,23 @@ header p {
   color: #666;
   font-size: 12px;
   pointer-events: none;
+}
+
+/* 仅在宽度较小（手机）的时候调整图表位置 */
+@media (max-width: 600px) {
+  /* 整体页边距小一点，给图表多一点横向空间 */
+  body {
+    padding: 8px;
+  }
+
+  .container {
+    padding: 16px 8px;
+  }
+
+  /* 把图表略微左移，并加宽一点 */
+  .chart-wrap {
+    margin-left: -12px;                /* 左移一点点 */
+    width: calc(100% + 24px);          /* 同时加宽，避免右边被裁掉 */
+  }
 }
 

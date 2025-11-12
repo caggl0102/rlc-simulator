@@ -173,7 +173,7 @@ window.addEventListener('load', function () {
     }
 
     // 状态条
-    statusDisplay.textContent = `状态: ${circuitStatus} (R=${R}Ω, L=${lSlider.value}mH, C=${cSlider.value}µF, E=${E.toFixed(1)}V)`;
+    statusDisplay.textContent = `状态: ${circuitStatus} (R=${R}Ω, L=${lSlider.value}mH, C=${cSlider.value}µF, Us=${E.toFixed(1)}V)`;
 
     // 三张图各自的坐标轴范围
     // y 轴根据数据自动估算一个对称范围
