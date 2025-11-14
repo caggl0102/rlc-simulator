@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>RLC 电路模拟（µH / µF & 三个波形）</title>
-  <link rel="stylesheet" href="style.css?v=2025-11-12-b" />
+  <link rel="stylesheet" href="style.css?v=2025-11-14-a" />
   <!-- 强制刷新：版本跳转（放在最前面） -->
   <script>
     // 每次发布只改这里：版本号
-    const BUILD_VERSION = "2025-11-12-b";
+    const BUILD_VERSION = "2025-11-14-a";
 
     (function forceFresh() {
       try {
@@ -37,7 +37,7 @@
       <h2>二阶电路工作状态</h2>
       <p>
         图示电路为 RLC 串联二阶电路，已知电容初始电压
-        u<sub>C</sub>(0)=10V。
+        u<sub>C</sub>(0)=10V，电感初始电流为0
       </p>
     </header>
 
@@ -125,12 +125,12 @@
   </div>
 
   <!-- ECharts：CDN + 本地兜底 + defer -->
-  <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js?v=2025-11-12-b"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js?v=2025-11-14-a"></script>
   <script>
     if (typeof window.echarts === 'undefined') {
-      document.write('<script defer src="libs/echarts.min.js?v=2025-11-12-b"><\/script>');
+      document.write('<script defer src="libs/echarts.min.js?v=2025-11-14-a"><\/script>');
     }
   </script>
-  <script defer src="script.js?v=2025-11-12-b"></script>
+  <script defer src="script.js?v=2025-11-14-a"></script>
 </body>
 </html>
